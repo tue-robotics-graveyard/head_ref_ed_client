@@ -82,7 +82,7 @@ int main(int argc, char** argv){
             if ( ed_client.call(req, resp) )
             {
                 if (resp.entities.size() == 0) {
-                    std::cout << "No entities in response" << std::endl;
+//                    std::cout << "No entities in response" << std::endl;
                     continue;
                 }
 
@@ -101,7 +101,7 @@ int main(int argc, char** argv){
 
                     if (!e.has_shape && inFrontOf(cp, robot_pose))
                     {
-                        std::cout << "View target: " << e.id << std::endl;
+//                        std::cout << "View target: " << e.id << std::endl;
 
                         // send a goal to the action
                         head_ref::HeadReferenceGoal goal;
@@ -118,7 +118,7 @@ int main(int argc, char** argv){
                     }
                 }
                 if (!found) {
-                    std::cout << "No target, cancelling all goals" << std::endl;
+//                    std::cout << "No target, cancelling all goals" << std::endl;
                     ac.cancelAllGoals();
                 }
             }
