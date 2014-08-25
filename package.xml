@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>head_ref_ed_client</name>
+  <version>0.0.0</version>
+  <description>The head_ref_ed_client package</description>
+
+  <maintainer email="r.p.w.appeldoorn@student.tue.nl">Rein Appeldoorn</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>ed</build_depend>
+  <build_depend>head_ref</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>geolib2</build_depend>
+
+  <run_depend>ed</run_depend>
+  <run_depend>head_ref</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>geolib2</run_depend>
+
+</package>
