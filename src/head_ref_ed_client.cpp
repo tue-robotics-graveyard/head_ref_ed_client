@@ -8,6 +8,7 @@
 #include <geolib/ros/msg_conversions.h>
 
 #include <tf/transform_listener.h>
+#include <boost/circular_buffer.hpp>
 
 struct Comp
 {
@@ -42,6 +43,15 @@ bool getRobotPoseMap(const ros::Time& time_stamp, geo::Pose3D& robot_pose)
     return true;
 }
 
+bool lastSeen(const geo::Vector3& p, const geo::Pose3D& pose)
+{
+    // Transform point
+    geo::Vector3 p_transformed = pose.inverse() * p;
+
+    // Check if it is in front (x-axis defined as front)
+    return (p_transformed.x > 0 && fabs(p_transformed.y) < p_transformed.x);
+}
+
 bool inFrontOf(const geo::Vector3& p, const geo::Pose3D& pose)
 {
     // Transform point
@@ -49,6 +59,48 @@ bool inFrontOf(const geo::Vector3& p, const geo::Pose3D& pose)
 
     // Check if it is in front (x-axis defined as front)
     return (p_transformed.x > 0 && fabs(p_transformed.y) < p_transformed.x);
+}
+
+// Keep track of last seen
+boost::circular_buffer<std::pair<std::string, double> > cb(10);
+bool getTargetEntityBasedOnLastSeen(const std::vector<ed::EntityInfo>& entities, ed::EntityInfo& e_target)
+{
+    double now = ros::Time::now().toSec();
+    double last_seen = now;
+
+    for (std::vector<ed::EntityInfo>::const_iterator it = entities.begin(); it != entities.end(); ++it)
+    {
+        // Closest
+        const ed::EntityInfo& e = *it;
+
+        // Loop over the circular buffer and try to find the element
+        bool found = false;
+        for (unsigned int i = 0; i < cb.size(); ++i)
+        {
+            if (cb[i].first == e.id)
+            {
+                if (cb[i].second < last_seen)
+                {
+                    last_seen = cb[i].second;
+                    e_target = e;
+                }
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+        {
+            std::cout << e.id << " not in buffer." << std::endl;
+            e_target = e;
+            return true;
+        }
+    }
+
+    if ( now - last_seen > 10.0 ) // Revisit @ 5.0 sec
+        return true;
+    else
+        return false;
 }
 
 int main(int argc, char** argv){
@@ -63,7 +115,7 @@ int main(int argc, char** argv){
 
     HeadReferenceActionClient::GoalHandle gh;
 
-    ros::Rate r(1);
+    ros::Rate r(.3);
     while (ros::ok()) {
 
         //! Request the pose of the robot in the map frame
@@ -82,16 +134,13 @@ int main(int argc, char** argv){
             if ( ed_client.call(req, resp) )
             {
                 if (resp.entities.size() == 0) {
-//                    std::cout << "No entities in response" << std::endl;
+                    std::cout << "No entities in response" << std::endl;
                     continue;
                 }
 
-                // Sort the response
-                Comp comp;
-                comp.p = robot_pose.getOrigin();
-                std::sort(resp.entities.begin(), resp.entities.end(), comp);
+                std::vector<ed::EntityInfo> entities;
 
-                bool found = false;
+                // Get all valid entities
                 for (std::vector<ed::EntityInfo>::const_iterator it = resp.entities.begin(); it != resp.entities.end(); ++it)
                 {
                     const ed::EntityInfo& e = *it;
@@ -100,25 +149,34 @@ int main(int argc, char** argv){
                     geo::convert(e.center_point, cp);
 
                     if (!e.has_shape && inFrontOf(cp, robot_pose))
-                    {
-//                        std::cout << "View target: " << e.id << std::endl;
-
-                        // send a goal to the action
-                        head_ref::HeadReferenceGoal goal;
-                        goal.target_point.header.frame_id = "/map";
-                        goal.target_point.header.stamp = ros::Time::now();
-                        goal.target_point.point = e.center_point;
-                        goal.goal_type = head_ref::HeadReferenceGoal::LOOKAT;
-
-                        goal.priority = 100;
-
-                        gh = ac.sendGoal(goal);
-                        found = true;
-                        break; // Only closest one
-                    }
+                        entities.push_back(e);
                 }
-                if (!found) {
-//                    std::cout << "No target, cancelling all goals" << std::endl;
+
+                // Sort the entities based on position to center point
+                Comp comp;
+                comp.p = robot_pose.getOrigin();
+                std::sort(entities.begin(), entities.end(), comp);
+
+                ed::EntityInfo e_target;
+                if (getTargetEntityBasedOnLastSeen(entities, e_target))
+                {
+                    std::cout << "Found target with id: " << e_target.id << std::endl;
+                    cb.push_front(std::make_pair<std::string, double>(e_target.id, ros::Time::now().toSec()));
+
+                    // send a goal to the action
+                    head_ref::HeadReferenceGoal goal;
+                    goal.target_point.header.frame_id = "/map";
+                    goal.target_point.header.stamp = ros::Time::now();
+                    goal.target_point.point = e_target.center_point;
+                    goal.goal_type = head_ref::HeadReferenceGoal::LOOKAT;
+
+                    goal.priority = 6;
+
+                    gh = ac.sendGoal(goal);
+                }
+                else
+                {
+                    std::cout << "No target, cancelling all goals" << std::endl;
                     ac.cancelAllGoals();
                 }
             }
