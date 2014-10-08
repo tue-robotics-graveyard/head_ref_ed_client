@@ -91,7 +91,7 @@ bool getTargetEntityBasedOnLastSeen(const std::vector<ed::EntityInfo>& entities,
 
         if (!found)
         {
-            std::cout << e.id << " not in buffer." << std::endl;
+//            std::cout << e.id << " not in buffer." << std::endl;
             e_target = e;
             return true;
         }
@@ -134,7 +134,7 @@ int main(int argc, char** argv){
             if ( ed_client.call(req, resp) )
             {
                 if (resp.entities.size() == 0) {
-                    std::cout << "No entities in response" << std::endl;
+//                    std::cout << "No entities in response" << std::endl;
                     continue;
                 }
 
@@ -160,7 +160,7 @@ int main(int argc, char** argv){
                 ed::EntityInfo e_target;
                 if (getTargetEntityBasedOnLastSeen(entities, e_target))
                 {
-                    std::cout << "Found target with id: " << e_target.id << std::endl;
+//                    std::cout << "Found target with id: " << e_target.id << std::endl;
                     cb.push_front(std::make_pair<std::string, double>(e_target.id, ros::Time::now().toSec()));
 
                     // send a goal to the action
@@ -176,7 +176,7 @@ int main(int argc, char** argv){
                 }
                 else
                 {
-                    std::cout << "No target, cancelling all goals" << std::endl;
+//                    std::cout << "No target, cancelling all goals" << std::endl;
                     ac.cancelAllGoals();
                 }
             }
