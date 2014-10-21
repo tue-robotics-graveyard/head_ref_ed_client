@@ -168,6 +168,7 @@ int main(int argc, char** argv){
                     goal.target_point.header.frame_id = "/map";
                     goal.target_point.header.stamp = ros::Time::now();
                     goal.target_point.point = e_target.center_point;
+                    goal.target_point.point.z += 0.5;
                     goal.goal_type = head_ref::HeadReferenceGoal::LOOKAT;
 
                     goal.priority = 6;
