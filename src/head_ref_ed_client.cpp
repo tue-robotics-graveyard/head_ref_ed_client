@@ -110,7 +110,7 @@ int main(int argc, char** argv){
     ros::NodeHandle nh;
 
     ros::ServiceClient ed_client = nh.serviceClient<ed::SimpleQuery>("/ed/simple_query");
-    actionlib::ActionClient<head_ref::HeadReferenceAction> ac("HeadReference");
+    actionlib::ActionClient<head_ref::HeadReferenceAction> ac("head_reference");
     tf_listener = new tf::TransformListener(nh);
 
     HeadReferenceActionClient::GoalHandle gh;
