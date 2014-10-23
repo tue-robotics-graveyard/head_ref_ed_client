@@ -58,7 +58,7 @@ bool inFrontOf(const geo::Vector3& p, const geo::Pose3D& pose)
     geo::Vector3 p_transformed = pose.inverse() * p;
 
     // Check if it is in front (x-axis defined as front)
-    return (p_transformed.x > 0 && fabs(p_transformed.y) < p_transformed.x);
+    return ((p_transformed.x > 0 && fabs(p_transformed.y) < p_transformed.x) || p_transformed.x > 0 && p_transformed.x < 1 && fabs(p_transformed.y) < 1);
 }
 
 // Keep track of last seen
