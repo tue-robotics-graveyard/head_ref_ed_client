@@ -168,6 +168,12 @@ int main(int argc, char** argv){
                     goal.target_point.header.frame_id = "/map";
                     goal.target_point.header.stamp = ros::Time::now();
                     goal.target_point.point = e_target.center_point;
+                    
+                    // Update z height?
+                    // Kind of hacky, but to recognize persons, it might be useful to look approximately
+                    // 30 cm below the maximum height...
+                    goal.target_point.point.z = std::max(goal.target_point.point.z, e_target.z_max - 0.15);
+                    
                     goal.goal_type = head_ref::HeadReferenceGoal::LOOKAT;
 
                     goal.priority = 6;
