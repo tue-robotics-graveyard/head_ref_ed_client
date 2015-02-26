@@ -107,10 +107,11 @@ int main(int argc, char** argv){
 
     ros::init(argc, argv, "ed_entity_checker");
 
-    ros::NodeHandle nh;
+    ros::NodeHandle nh("~");
+    ros::NodeHandle gnh;
 
-    ros::ServiceClient ed_client = nh.serviceClient<ed::SimpleQuery>("/ed/simple_query");
-    actionlib::ActionClient<head_ref::HeadReferenceAction> ac("head_reference");
+    ros::ServiceClient ed_client = gnh.serviceClient<ed::SimpleQuery>("ed/simple_query");
+    actionlib::ActionClient<head_ref::HeadReferenceAction> ac("head_ref/action_server");
     tf_listener = new tf::TransformListener(nh);
 
     HeadReferenceActionClient::GoalHandle gh;
