@@ -117,7 +117,10 @@ int main(int argc, char** argv){
     HeadReferenceActionClient::GoalHandle gh;
 
     ros::Rate r(.3);
-    while (ros::ok()) {
+    while (ros::ok())
+    {
+        // 'continue' statement is used below, so sleep first
+        r.sleep();
 
         //! Request the pose of the robot in the map frame
         geo::Pose3D robot_pose;
@@ -182,8 +185,6 @@ int main(int argc, char** argv){
                 }
             }
         }
-
-        r.sleep();
     }
 
     // Cancel the goal when loop is interupted with key press for example
