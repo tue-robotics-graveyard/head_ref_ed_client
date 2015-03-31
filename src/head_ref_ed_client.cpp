@@ -181,7 +181,7 @@ int main(int argc, char** argv){
                 else
                 {
 //                    std::cout << "No target, cancelling all goals" << std::endl;
-                    ac.cancelAllGoals();
+                    gh.cancel();
                 }
             }
         }
