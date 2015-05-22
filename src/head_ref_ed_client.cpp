@@ -15,8 +15,8 @@ struct Comp
     bool operator()(const ed::EntityInfo& a, const ed::EntityInfo& b)
     {
         geo::Vector3 a_cp, b_cp, a_diff, b_diff;
-        geo::convert(a.center_point, a_cp);
-        geo::convert(b.center_point, b_cp);
+        geo::convert(a.pose.position, a_cp);
+        geo::convert(b.pose.position, b_cp);
 
         a_diff = a_cp - p; a_diff.x = 0;
         b_diff = b_cp - p; b_diff.x = 0;
@@ -148,9 +148,11 @@ int main(int argc, char** argv){
                 for (std::vector<ed::EntityInfo>::const_iterator it = resp.entities.begin(); it != resp.entities.end(); ++it)
                 {
                     const ed::EntityInfo& e = *it;
+                    if (!e.has_pose)
+                        continue;
 
                     geo::Vector3 cp;
-                    geo::convert(e.center_point, cp);
+                    geo::convert(e.pose.position, cp);
 
                     if (!e.has_shape && inFrontOf(cp, robot_pose))
                         entities.push_back(e);
@@ -171,7 +173,7 @@ int main(int argc, char** argv){
                     head_ref::HeadReferenceGoal goal;
                     goal.target_point.header.frame_id = "/map";
                     goal.target_point.header.stamp = ros::Time::now();
-                    goal.target_point.point = e_target.center_point;
+                    goal.target_point.point = e_target.pose.position;
                     goal.goal_type = head_ref::HeadReferenceGoal::LOOKAT;
 
                     goal.priority = 6;
