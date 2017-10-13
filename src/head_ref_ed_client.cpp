@@ -1,7 +1,7 @@
 #include <actionlib/client/action_client.h>
 #include "head_ref/HeadReferenceAction.h"
 
-#include <ed/SimpleQuery.h>
+#include <ed_msgs/SimpleQuery.h>
 
 #include <geolib/datatypes.h>
 #include <geolib/ros/tf_conversions.h>
@@ -12,7 +12,7 @@
 
 struct Comp
 {
-    bool operator()(const ed::EntityInfo& a, const ed::EntityInfo& b)
+    bool operator()(const ed_msgs::EntityInfo& a, const ed_msgs::EntityInfo& b)
     {
         geo::Vector3 a_cp, b_cp, a_diff, b_diff;
         geo::convert(a.pose.position, a_cp);
@@ -63,15 +63,15 @@ bool inFrontOf(const geo::Vector3& p, const geo::Pose3D& pose)
 
 // Keep track of last seen
 boost::circular_buffer<std::pair<std::string, double> > cb(10);
-bool getTargetEntityBasedOnLastSeen(const std::vector<ed::EntityInfo>& entities, ed::EntityInfo& e_target)
+bool getTargetEntityBasedOnLastSeen(const std::vector<ed_msgs::EntityInfo>& entities, ed_msgs::EntityInfo& e_target)
 {
     double now = ros::Time::now().toSec();
     double last_seen = now;
 
-    for (std::vector<ed::EntityInfo>::const_iterator it = entities.begin(); it != entities.end(); ++it)
+    for (std::vector<ed_msgs::EntityInfo>::const_iterator it = entities.begin(); it != entities.end(); ++it)
     {
         // Closest
-        const ed::EntityInfo& e = *it;
+        const ed_msgs::EntityInfo& e = *it;
 
         // Loop over the circular buffer and try to find the element
         bool found = false;
@@ -110,7 +110,7 @@ int main(int argc, char** argv){
     ros::NodeHandle nh("~");
     ros::NodeHandle gnh;
 
-    ros::ServiceClient ed_client = gnh.serviceClient<ed::SimpleQuery>("ed/simple_query");
+    ros::ServiceClient ed_client = gnh.serviceClient<ed_msgs::SimpleQuery>("ed/simple_query");
     actionlib::ActionClient<head_ref::HeadReferenceAction> ac("head_ref/action_server");
     tf_listener = new tf::TransformListener(nh);
 
@@ -127,8 +127,8 @@ int main(int argc, char** argv){
         if (getRobotPoseMap(ros::Time(0), robot_pose))
         {
             //! Request and response
-            ed::SimpleQueryRequest req;
-            ed::SimpleQueryResponse resp;
+            ed_msgs::SimpleQueryRequest req;
+            ed_msgs::SimpleQueryResponse resp;
 
             //! Fill the request
             geo::convert(robot_pose.getOrigin(), req.center_point);
@@ -142,12 +142,12 @@ int main(int argc, char** argv){
                     continue;
                 }
 
-                std::vector<ed::EntityInfo> entities;
+                std::vector<ed_msgs::EntityInfo> entities;
 
                 // Get all valid entities
-                for (std::vector<ed::EntityInfo>::const_iterator it = resp.entities.begin(); it != resp.entities.end(); ++it)
+                for (std::vector<ed_msgs::EntityInfo>::const_iterator it = resp.entities.begin(); it != resp.entities.end(); ++it)
                 {
-                    const ed::EntityInfo& e = *it;
+                    const ed_msgs::EntityInfo& e = *it;
                     if (!e.has_pose)
                         continue;
 
@@ -163,7 +163,7 @@ int main(int argc, char** argv){
                 comp.p = robot_pose.getOrigin();
                 std::sort(entities.begin(), entities.end(), comp);
 
-                ed::EntityInfo e_target;
+                ed_msgs::EntityInfo e_target;
                 if (getTargetEntityBasedOnLastSeen(entities, e_target))
                 {
 //                    std::cout << "Found target with id: " << e_target.id << std::endl;
