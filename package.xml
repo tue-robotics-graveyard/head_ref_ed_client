@@ -10,13 +10,11 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>ed</build_depend>
   <build_depend>ed_msgs</build_depend>
   <build_depend>head_ref</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>geolib2</build_depend>
 
-  <run_depend>ed</run_depend>
   <run_depend>ed_msgs</run_depend>
   <run_depend>head_ref</run_depend>
   <run_depend>roscpp</run_depend>
