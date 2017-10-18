@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(head_ref_ed_client)
 
 find_package(catkin REQUIRED COMPONENTS
-  ed
+  ed_msgs
   head_ref
   roscpp
   geolib2
