@@ -3,7 +3,7 @@ project(head_ref_ed_client)
 
 find_package(catkin REQUIRED COMPONENTS
   ed_msgs
-  head_ref
+  head_ref_msgs
   roscpp
   geolib2
 )

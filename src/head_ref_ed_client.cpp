@@ -1,5 +1,5 @@
 #include <actionlib/client/action_client.h>
-#include "head_ref/HeadReferenceAction.h"
+#include "head_ref_msgs/HeadReferenceAction.h"
 
 #include <ed_msgs/SimpleQuery.h>
 
@@ -28,7 +28,7 @@ struct Comp
 
 };
 
-typedef actionlib::ActionClient<head_ref::HeadReferenceAction> HeadReferenceActionClient;
+typedef actionlib::ActionClient<head_ref_msgs::HeadReferenceAction> HeadReferenceActionClient;
 
 tf::TransformListener* tf_listener;
 bool getRobotPoseMap(const ros::Time& time_stamp, geo::Pose3D& robot_pose)
@@ -111,7 +111,7 @@ int main(int argc, char** argv){
     ros::NodeHandle gnh;
 
     ros::ServiceClient ed_client = gnh.serviceClient<ed_msgs::SimpleQuery>("ed/simple_query");
-    actionlib::ActionClient<head_ref::HeadReferenceAction> ac("head_ref/action_server");
+    actionlib::ActionClient<head_ref_msgs::HeadReferenceAction> ac("head_ref/action_server");
     tf_listener = new tf::TransformListener(nh);
 
     HeadReferenceActionClient::GoalHandle gh;
@@ -170,11 +170,11 @@ int main(int argc, char** argv){
                     cb.push_front(std::make_pair<std::string, double>(e_target.id, ros::Time::now().toSec()));
 
                     // send a goal to the action
-                    head_ref::HeadReferenceGoal goal;
+                    head_ref_msgs::HeadReferenceGoal goal;
                     goal.target_point.header.frame_id = "/map";
                     goal.target_point.header.stamp = ros::Time::now();
                     goal.target_point.point = e_target.pose.position;
-                    goal.goal_type = head_ref::HeadReferenceGoal::LOOKAT;
+                    goal.goal_type = head_ref_msgs::HeadReferenceGoal::LOOKAT;
 
                     goal.priority = 6;
 
